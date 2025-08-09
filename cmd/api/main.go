@@ -22,12 +22,16 @@ func main() {
 
 	// Initialize Repository Layer
 	tenorRepo := postgres.NewTenorRepository(db)
+	facilityDetail := postgres.NewUserFacilityDetailRepository(db)
+	facilityRepo := postgres.NewUserFacilityRepository(db)
+	facilityLimit := postgres.NewUserFacilityLimitRepository(db)
+	txManager := postgres.NewTransactionManager(db)
 
 	// Initialize Usecase Layer
-	calculateUseCase := usecase.NewFinancingUsecase(tenorRepo)
+	financingUsecase := usecase.NewFinancingUsecase(tenorRepo, facilityDetail, facilityRepo, facilityLimit, txManager)
 
 	// Initialize Delivery Layer (Handler)
-	apiHandler := httpDelivery.NewHandler(calculateUseCase)
+	apiHandler := httpDelivery.NewHandler(financingUsecase)
 
 	// Setup Router and Start Server
 	router := httpDelivery.SetupRouter(apiHandler)

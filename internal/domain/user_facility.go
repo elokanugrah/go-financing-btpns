@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type UserFacility struct {
 	UserFacilityID     int64 `gorm:"primaryKey"`
@@ -14,4 +17,8 @@ type UserFacility struct {
 	TotalPayment       float64
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
+}
+
+type UserFacilityRepository interface {
+	Create(ctx context.Context, uf *UserFacility) error
 }

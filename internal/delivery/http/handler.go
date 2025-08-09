@@ -3,19 +3,18 @@ package http
 import (
 	"net/http"
 
-	"github.com/elokanugrah/go-financing-btpns/internal/domain"
 	"github.com/elokanugrah/go-financing-btpns/internal/dto"
 	"github.com/elokanugrah/go-financing-btpns/internal/usecase"
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
-	calculateUsecase usecase.FinancingUsecase
+	financingUsecase usecase.FinancingUsecase
 }
 
-func NewHandler(cuc usecase.FinancingUsecase) *Handler {
+func NewHandler(fuc usecase.FinancingUsecase) *Handler {
 	return &Handler{
-		calculateUsecase: cuc,
+		financingUsecase: fuc,
 	}
 }
 
@@ -26,20 +25,26 @@ func (h *Handler) Calculate(c *gin.Context) {
 		return
 	}
 
-	// Tenor hardcoded sementara, nanti bisa ambil dari DB
-	tenors := []domain.Tenor{
-		{TenorValue: 6},
-		{TenorValue: 12},
-		{TenorValue: 18},
-		{TenorValue: 24},
-		{TenorValue: 30},
-		{TenorValue: 36},
-	}
-
-	resp, err := h.calculateUsecase.CalculateAllTenors(c.Request.Context(), req.Amount, tenors)
+	resp, err := h.financingUsecase.CalculateAllTenors(c.Request.Context(), req.Amount)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	c.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) SubmitFinancing(c *gin.Context) {
+	var req dto.SubmitFinancingRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	resp, err := h.financingUsecase.SubmitFinancing(c.Request.Context(), req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, resp)
 }

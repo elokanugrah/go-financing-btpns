@@ -7,17 +7,14 @@ import (
 	"github.com/elokanugrah/go-financing-btpns/internal/domain"
 )
 
-type TenorRepository interface {
-	GetAll(ctx context.Context) ([]domain.Tenor, error)
-}
-
 type tenorRepository struct {
 	db *sql.DB
 }
 
-func NewTenorRepository(db *sql.DB) TenorRepository {
+func NewTenorRepository(db *sql.DB) domain.TenorRepository {
 	return &tenorRepository{db: db}
 }
+
 func (r *tenorRepository) GetAll(ctx context.Context) ([]domain.Tenor, error) {
 	rows, err := r.db.QueryContext(ctx, `SELECT tenor_id, tenor_value, created_at, updated_at FROM tenors ORDER BY tenor_value ASC`)
 	if err != nil {

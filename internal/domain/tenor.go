@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type Tenor struct {
 	TenorID    int64 `gorm:"primaryKey"`
@@ -14,4 +17,8 @@ func (t Tenor) Calculate(amount float64, marginRate float64) (monthlyInstallment
 	totalPayment = amount + totalMargin
 	monthlyInstallment = totalPayment / float64(t.TenorValue)
 	return
+}
+
+type TenorRepository interface {
+	GetAll(ctx context.Context) ([]Tenor, error)
 }

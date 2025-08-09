@@ -25,6 +25,10 @@ func main() {
 		log.Fatalf("FATAL: Failed to seed users: %v", err)
 	}
 
+	if err := seedUserFacilityLimits(db); err != nil {
+		log.Fatalf("FATAL: Failed to seed users: %v", err)
+	}
+
 	log.Println("Seeding process completed successfully!")
 }
 
@@ -95,6 +99,47 @@ func seedUsers(db *sql.DB) error {
 
 	for _, user := range users {
 		if _, err := tx.Stmt(stmt).Exec(user.Name, user.Phone); err != nil {
+			if rbErr := tx.Rollback(); rbErr != nil {
+				return fmt.Errorf("error executing insert and rolling back transaction: %w, %w", err, rbErr)
+			}
+			return fmt.Errorf("error executing insert: %w", err)
+		}
+	}
+
+	log.Println("Committing transaction for users...")
+	return tx.Commit()
+}
+
+// seedUsers clears the users table and inserts dummy users.
+func seedUserFacilityLimits(db *sql.DB) error {
+	log.Println("Clearing users table...")
+	_, err := db.Exec(`TRUNCATE TABLE user_facility_limits RESTART IDENTITY CASCADE`)
+	if err != nil {
+		return fmt.Errorf("error truncating user_facility_limits table: %w", err)
+	}
+
+	stmt, err := db.Prepare(`INSERT INTO user_facility_limits (user_id, limit_amount) VALUES ($1, $2)`)
+	if err != nil {
+		return fmt.Errorf("error preparing insert statement: %w", err)
+	}
+	defer stmt.Close()
+
+	userLimits := []struct {
+		UserID      int64
+		LimitAmount float64
+	}{
+		{1, 10000000},
+		{2, 5000000},
+		{3, 15000000},
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		return fmt.Errorf("error beginning transaction: %w", err)
+	}
+
+	for _, user := range userLimits {
+		if _, err := tx.Stmt(stmt).Exec(user.UserID, user.LimitAmount); err != nil {
 			if rbErr := tx.Rollback(); rbErr != nil {
 				return fmt.Errorf("error executing insert and rolling back transaction: %w, %w", err, rbErr)
 			}

@@ -1,7 +1,7 @@
 package dto
 
 type CalculateRequest struct {
-	Amount float64 `json:"amount" binding:"required"`
+	Amount float64 `json:"amount"`
 }
 
 type CalculationResult struct {

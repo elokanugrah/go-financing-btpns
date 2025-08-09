@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type UserFacilityDetail struct {
 	DetailID          int64 `gorm:"primaryKey"`
@@ -9,4 +12,8 @@ type UserFacilityDetail struct {
 	InstallmentAmount float64
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
+}
+
+type UserFacilityDetailRepository interface {
+	BulkCreate(ctx context.Context, details []UserFacilityDetail) error
 }
