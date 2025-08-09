@@ -1,5 +1,20 @@
 services:
-  db-financing:
+  api-service:
+    build: . # Build from Dockerfile in current directory
+    ports:
+      - "9000:9000"
+    environment:
+      # Getting environment variables from .env file
+      - SERVER_PORT=${SERVER_PORT}
+      - DB_HOST=db
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
     image: postgres:14-alpine
     ports:
       - "5432:5432"
